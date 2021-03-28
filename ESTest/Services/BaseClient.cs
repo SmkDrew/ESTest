@@ -1,4 +1,7 @@
-﻿using Nest;
+﻿using ESTest.Model;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Nest;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,16 +12,20 @@ namespace ESTest.Services
     {
         private readonly ElasticClient _client;
         public ElasticClient Client => _client;
+        private readonly ILogger<BaseClient> _logger;
+
 
         private string _user { get; set; }
         private string _password { get; set; }
         private string _baseUrl { get; set; }
 
-        public BaseClient(string user, string password, string baseUrl)
+        public BaseClient(ILogger<BaseClient> logger, IConfiguration config)
         {
-            _user = user;
-            _password = password;
-            _baseUrl = baseUrl;
+            var esSettings = config.GetSection("AppSettings:ESConnection").Get<ESConnection>();
+            _user = esSettings.User;
+            _password = esSettings.Password;
+            _baseUrl = esSettings.Url;
+            _logger = logger;
 
             var node = new Uri(_baseUrl);
             var settings = new ConnectionSettings(node).BasicAuthentication(_user, _password);
@@ -34,10 +41,21 @@ namespace ESTest.Services
         {
             CreateIndexResponse resp = null;
 
-            if (!_client.Indices.Exists(indName).Exists)
+            try
             {
-                resp = _client.Indices.Create(indName, c => c.Map<T1>(m => m.AutoMap()).Map<T2>(m => m.AutoMap()));
+                if (!_client.Indices.Exists(indName).Exists)
+                {
+                    resp = _client.Indices.Create(indName, c => c.Map<T1>(m => m.AutoMap()).Map<T2>(m => m.AutoMap()));
+                }
+
+                _logger.LogInformation($"Index {indName} has been created");
             }
+            catch (Exception)
+            {
+                _logger.LogInformation($"An error occurred while creating the index {indName}");
+                return false;
+            }
+
 
             return resp.IsValid;
         }
@@ -48,7 +66,19 @@ namespace ESTest.Services
         /// <returns></returns>
         public async Task<bool> UploadDocs<T>(string indName, IEnumerable<T> items) where T: class
         {
-            var resp = await _client.BulkAsync(b => b.Index(indName).IndexMany(items));
+            BulkResponse resp = null;
+
+            try
+            {
+                resp = await _client.BulkAsync(b => b.Index(indName).IndexMany(items));
+                _logger.LogInformation($"Documents have been uploaded into index {indName}");
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation($"An error occurred while uploading documents");
+                return false;
+            }
+            
             return resp.IsValid;
         }
 
@@ -62,11 +92,10 @@ namespace ESTest.Services
             try
             {
                 result = await _client.Indices.GetAsync(new GetIndexRequest(Indices.All));                
-                //_logger.LogInformation($"Well data requested. Well Uid:{uid}");
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, $"Failed to get well data. Well Uid:{uid}");
+                _logger.LogError(ex, $"Failed to get indexes");
             }
 
             return result;
@@ -79,12 +108,22 @@ namespace ESTest.Services
         {
             DeleteIndexResponse resp = null;
 
-            if (_client.Indices.Exists(indName).Exists)
+            try
             {
-                resp = await _client.Indices.DeleteAsync(indName);
+                if (_client.Indices.Exists(indName).Exists)
+                {
+                    resp = await _client.Indices.DeleteAsync(indName);
+                }
+                else
+                {
+                    return false;
+                }
+
+                _logger.LogInformation($"Index {indName} has been deleted");
             }
-            else
+            catch (Exception)
             {
+                _logger.LogError($"Failed to delete index {indName}");
                 return false;
             }
 

@@ -1,5 +1,5 @@
 ﻿using ESTest.Model.Models;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Nest;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace ESTest.Services
         private string _propertiesFilePath => "SourceFiles\\properties.json";
         private string _indName => "main";
 
-        public ESClient(IConfiguration configuration, BaseClient client)
+        public ESClient(BaseClient client)
         {
             _client = client;
         }

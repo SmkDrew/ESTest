@@ -21,9 +21,7 @@ namespace ESTest
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
-            var esSettings = Configuration.GetSection("AppSettings:ESConnection").Get<ESConnection>();
-            services.AddSingleton<BaseClient>(s => new BaseClient(esSettings.User, esSettings.Password, esSettings.Url) );
+            services.AddSingleton<BaseClient>();
             services.AddSingleton<ESClient>();
         }
 
