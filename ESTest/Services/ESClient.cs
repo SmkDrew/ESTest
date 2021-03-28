@@ -1,16 +1,11 @@
-﻿using ESTest.Model;
-using ESTest.Model.Models;
+﻿using ESTest.Model.Models;
 using Microsoft.Extensions.Configuration;
+using Nest;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Text.Json;
-using Nest;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace ESTest.Services
 {

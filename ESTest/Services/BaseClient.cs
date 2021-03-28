@@ -1,13 +1,6 @@
-﻿using ESTest.Controllers;
-using ESTest.Model;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Nest;
+﻿using Nest;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ESTest.Services

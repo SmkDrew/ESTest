@@ -1,10 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
-
-namespace ESTest.Model.Models
+﻿namespace ESTest.Model.Models
 {
     public class DocProperty
     {

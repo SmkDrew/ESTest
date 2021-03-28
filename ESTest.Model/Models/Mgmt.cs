@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ESTest.Model.Models
+﻿namespace ESTest.Model.Models
 {
     public class DocMgmt
     {
